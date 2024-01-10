@@ -149,21 +149,18 @@ class IdPrependingTreeprocessor(Treeprocessor):
         if not self.id_prefix:
             return
         for el in root.iter():
-            id_attr = el.get("id")
-            if id_attr:
+            if id_attr := el.get("id"):
                 el.set("id", self.id_prefix + id_attr)
 
             href_attr = el.get("href")
             if href_attr and href_attr.startswith("#"):
-                el.set("href", "#" + self.id_prefix + href_attr[1:])
+                el.set("href", f"#{self.id_prefix}{href_attr[1:]}")
 
-            name_attr = el.get("name")
-            if name_attr:
+            if name_attr := el.get("name"):
                 el.set("name", self.id_prefix + name_attr)
 
             if el.tag == "label":
-                for_attr = el.get("for")
-                if for_attr:
+                if for_attr := el.get("for"):
                     el.set("for", self.id_prefix + for_attr)
 
 
@@ -190,8 +187,7 @@ class HeadingShiftingTreeprocessor(Treeprocessor):
         if not self.shift_by:
             return
         for el in root.iter():
-            match = self.regex.fullmatch(el.tag)
-            if match:
+            if match := self.regex.fullmatch(el.tag):
                 level = int(match[2]) + self.shift_by
                 level = max(1, min(level, 6))
                 el.tag = f"{match[1]}{level}"
