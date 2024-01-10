@@ -112,8 +112,7 @@ def get_template_path(context: Context) -> str:
         The relative path to the template.
     """
     context_name: str = str(context.name)
-    filename = context.environment.get_template(context_name).filename
-    if filename:
+    if filename := context.environment.get_template(context_name).filename:
         for template_dir in TEMPLATES_DIRS:
             with suppress(ValueError):
                 return str(Path(filename).relative_to(template_dir))

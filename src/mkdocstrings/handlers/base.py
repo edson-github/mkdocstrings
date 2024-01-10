@@ -55,9 +55,7 @@ def do_any(seq: Sequence, attribute: str | None = None) -> bool:
     Returns:
         A boolean telling if any object of the iterable evaluated to True.
     """
-    if attribute is None:
-        return any(seq)
-    return any(_[attribute] for _ in seq)
+    return any(seq) if attribute is None else any(_[attribute] for _ in seq)
 
 
 class BaseHandler:
@@ -98,25 +96,23 @@ class BaseHandler:
             theme: The name of theme to use.
             custom_templates: Directory containing custom templates.
         """
-        paths = []
-
         # add selected theme templates
         themes_dir = self.get_templates_dir(handler)
-        paths.append(themes_dir / theme)
-
+        paths = [themes_dir / theme]
         # add extended theme templates
         extended_templates_dirs = self.get_extended_templates_dirs(handler)
-        for templates_dir in extended_templates_dirs:
-            paths.append(templates_dir / theme)
-
+        paths.extend(
+            templates_dir / theme for templates_dir in extended_templates_dirs
+        )
         # add fallback theme templates
         if self.fallback_theme and self.fallback_theme != theme:
             paths.append(themes_dir / self.fallback_theme)
 
             # add fallback theme of extended templates
-            for templates_dir in extended_templates_dirs:
-                paths.append(templates_dir / self.fallback_theme)
-
+            paths.extend(
+                templates_dir / self.fallback_theme
+                for templates_dir in extended_templates_dirs
+            )
         for path in paths:
             css_path = path / "style.css"
             if css_path.is_file():
@@ -270,7 +266,9 @@ class BaseHandler:
         """
         treeprocessors = self._md.treeprocessors
         treeprocessors[HeadingShiftingTreeprocessor.name].shift_by = heading_level  # type: ignore[attr-defined]
-        treeprocessors[IdPrependingTreeprocessor.name].id_prefix = html_id and html_id + "--"  # type: ignore[attr-defined]
+        treeprocessors[IdPrependingTreeprocessor.name].id_prefix = (
+            html_id and f"{html_id}--"
+        )
         treeprocessors[ParagraphStrippingTreeprocessor.name].strip = strip_paragraph  # type: ignore[attr-defined]
         try:
             return Markup(self._md.convert(text))
@@ -418,9 +416,7 @@ class Handlers:
             The name of the handler to use.
         """
         global_config = self._config["mkdocstrings"]
-        if "handler" in config:
-            return config["handler"]
-        return global_config["default_handler"]
+        return config.get("handler", global_config["default_handler"])
 
     def get_handler_config(self, name: str) -> dict:
         """Return the global configuration of the given handler.
@@ -431,8 +427,7 @@ class Handlers:
         Returns:
             The global configuration of the given handler. It can be an empty dictionary.
         """
-        handlers = self._config["mkdocstrings"].get("handlers", {})
-        if handlers:
+        if handlers := self._config["mkdocstrings"].get("handlers", {}):
             return handlers.get(name, {})
         return {}
 

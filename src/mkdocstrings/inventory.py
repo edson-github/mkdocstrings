@@ -51,7 +51,7 @@ class InventoryItem:
             dispname = "-"
         uri = self.uri
         if uri.endswith(self.name):
-            uri = uri[: -len(self.name)] + "$"
+            uri = f"{uri[:-len(self.name)]}$"
         return f"{self.name} {self.domain}:{self.role} {self.priority} {uri} {dispname}"
 
     sphinx_item_regex = re.compile(r"^(.+?)\s+(\S+):(\S+)\s+(-?\d+)\s+(\S+)\s*(.*)$")

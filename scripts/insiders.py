@@ -54,8 +54,9 @@ class Feature:
     def render(self, rel_base: str = "..", *, badge: bool = False) -> None:  # noqa: D102
         new = ""
         if badge:
-            recent = self.since and date.today() - self.since <= timedelta(days=60)  # noqa: DTZ011
-            if recent:
+            if recent := self.since and date.today() - self.since <= timedelta(
+                days=60
+            ):
                 ft_date = self.since.strftime("%B %d, %Y")  # type: ignore[union-attr]
                 new = f' :material-alert-decagram:{{ .new-feature .vibrate title="Added on {ft_date}" }}'
         project = f"[{self.project.name}]({self.project.url}) — " if self.project else ""
